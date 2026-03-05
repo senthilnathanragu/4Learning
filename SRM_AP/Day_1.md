@@ -1,5 +1,3 @@
----
-
 ## 1. Overview of Programming Languages
 
 A **programming language** is a formal set of instructions used to communicate with a computer.
