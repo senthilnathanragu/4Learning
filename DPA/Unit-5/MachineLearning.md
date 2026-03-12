@@ -234,183 +234,48 @@ Features: Sepal length, Sepal width, Petal length, Petal width
 ### 🔬 Experiment 2: KNN on Iris Dataset
 
 ```python
-# ============================================================
-# EXPERIMENT 2: KNN Classification on Iris Dataset
-# ============================================================
-
-# Step 1: Import Libraries
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import (confusion_matrix, classification_report,
-                              accuracy_score)
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-# -------------------------------------------------------
-# Step 2: Load and Explore the Dataset
-# -------------------------------------------------------
+# Load dataset
 iris = load_iris()
 
-# Convert to DataFrame for easy viewing
-df = pd.DataFrame(iris.data, columns=iris.feature_names)
-df['Species'] = iris.target
-df['Species_Name'] = df['Species'].map({0: 'Setosa', 1: 'Versicolor', 2: 'Virginica'})
+X = iris.data
+y = iris.target
 
-print("=== IRIS DATASET ===")
-print(f"Shape: {df.shape}")
-print(f"\nFirst 10 rows:")
-print(df.head(10))
-
-print(f"\nSpecies Distribution:")
-print(df['Species_Name'].value_counts())
-
-print(f"\nStatistics:")
-print(df.describe())
-
-# -------------------------------------------------------
-# Step 3: Prepare Features and Target
-# -------------------------------------------------------
-X = iris.data    # All 4 features
-y = iris.target  # Species (0, 1, or 2)
-
-print(f"\nFeature matrix X shape: {X.shape}")  # (150, 4)
-print(f"Target vector y shape:  {y.shape}")    # (150,)
-print(f"Classes: {iris.target_names}")
-
-# -------------------------------------------------------
-# Step 4: Split Data
-# -------------------------------------------------------
+# Split dataset
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42
+    X, y, test_size=0.2, random_state=42
 )
-print(f"\nTrain: {X_train.shape[0]} samples")
-print(f"Test:  {X_test.shape[0]} samples")
 
-# -------------------------------------------------------
-# Step 5: Feature Scaling (Very Important for KNN!)
-# -------------------------------------------------------
-# KNN uses distance — if one feature has large values (like 1000)
-# and another has small values (like 0.5), the large one dominates!
-# Scaling brings all features to same range.
+# Create model
+knn = KNeighborsClassifier(n_neighbors=3)
 
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled  = scaler.transform(X_test)   # Use same scaler!
+# Train model
+knn.fit(X_train, y_train)
 
-print("\nBefore Scaling (first row):", X_train[0])
-print("After Scaling  (first row):", X_train_scaled[0].round(3))
+# Predict
+y_pred = knn.predict(X_test)
 
-# -------------------------------------------------------
-# Step 6: Find Best K Value
-# -------------------------------------------------------
-print("\n--- Testing Different K Values ---")
-k_values  = range(1, 21)
-accuracies = []
-
-for k in k_values:
-    knn = KNeighborsClassifier(n_neighbors=k)
-    knn.fit(X_train_scaled, y_train)
-    acc = accuracy_score(y_test, knn.predict(X_test_scaled))
-    accuracies.append(acc)
-    print(f"K={k:2d}  →  Accuracy: {acc*100:.2f}%")
-
-best_k = k_values[np.argmax(accuracies)]
-print(f"\nBest K = {best_k} with accuracy {max(accuracies)*100:.2f}%")
-
-# -------------------------------------------------------
-# Step 7: Train Final Model with Best K
-# -------------------------------------------------------
-knn_final = KNeighborsClassifier(n_neighbors=best_k)
-knn_final.fit(X_train_scaled, y_train)
-y_pred = knn_final.predict(X_test_scaled)
-
-# -------------------------------------------------------
-# Step 8: Evaluate Model
-# -------------------------------------------------------
-accuracy = accuracy_score(y_test, y_pred)
-print(f"\n=== MODEL EVALUATION (K={best_k}) ===")
-print(f"Accuracy: {accuracy*100:.2f}%")
-
-print("\n--- Classification Report ---")
-print(classification_report(y_test, y_pred, target_names=iris.target_names))
-
-# -------------------------------------------------------
-# Step 9: Confusion Matrix
-# -------------------------------------------------------
-# Confusion Matrix tells us:
-# - How many predictions were correct
-# - Where the model made mistakes
-
+# Confusion Matrix
 cm = confusion_matrix(y_test, y_pred)
-print("--- Confusion Matrix ---")
+
+print("Confusion Matrix:")
 print(cm)
 
-# Explained:
-#         Predicted
-#          Set  Ver  Vir
-# Actual Set[ 19    0    0 ]  ← 19 Setosa correctly predicted
-#        Ver[  0   12    1 ]  ← 1 Versicolor wrongly called Virginica
-#        Vir[  0    0   13 ]  ← 13 Virginica correctly predicted
+# Plot confusion matrix
+sns.heatmap(cm, annot=True, cmap="Blues")
 
-# -------------------------------------------------------
-# Step 10: Visualizations
-# -------------------------------------------------------
-fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
 
-# --- Plot 1: K vs Accuracy ---
-axes[0].plot(k_values, [a*100 for a in accuracies], 'bo-', linewidth=2, markersize=6)
-axes[0].axvline(x=best_k, color='red', linestyle='--', label=f'Best K={best_k}')
-axes[0].set_xlabel('K Value')
-axes[0].set_ylabel('Accuracy (%)')
-axes[0].set_title('K vs Accuracy')
-axes[0].legend()
-axes[0].grid(True, alpha=0.3)
-
-# --- Plot 2: Confusion Matrix Heatmap ---
-sns.heatmap(cm,
-            annot=True,        # Show numbers in cells
-            fmt='d',           # Integer format
-            cmap='Blues',      # Color scheme
-            xticklabels=iris.target_names,
-            yticklabels=iris.target_names,
-            ax=axes[1])
-axes[1].set_xlabel('Predicted Label')
-axes[1].set_ylabel('Actual Label')
-axes[1].set_title(f'Confusion Matrix (K={best_k})')
-
-# --- Plot 3: Scatter plot of features ---
-colors = ['red', 'green', 'blue']
-for i, species in enumerate(iris.target_names):
-    mask = y == i
-    axes[2].scatter(X[mask, 0], X[mask, 1],
-                    c=colors[i], label=species, alpha=0.7, s=60)
-axes[2].set_xlabel('Sepal Length (cm)')
-axes[2].set_ylabel('Sepal Width (cm)')
-axes[2].set_title('Iris Dataset — Species Distribution')
-axes[2].legend()
-axes[2].grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.savefig('knn_result.png', dpi=100)
-plt.show()
-
-# -------------------------------------------------------
-# Step 11: Predict a New Flower
-# -------------------------------------------------------
-new_flower = np.array([[5.1, 3.5, 1.4, 0.2]])  # New measurement
-new_flower_scaled = scaler.transform(new_flower)
-prediction = knn_final.predict(new_flower_scaled)
-probabilities = knn_final.predict_proba(new_flower_scaled)
-
-print(f"\n=== PREDICT NEW FLOWER ===")
-print(f"Measurements: Sepal L=5.1, Sepal W=3.5, Petal L=1.4, Petal W=0.2")
-print(f"Predicted Species: {iris.target_names[prediction[0]]}")
-print(f"Probabilities: {dict(zip(iris.target_names, probabilities[0].round(2)))}")
-```
+plt.show()```
 
 ---
 
