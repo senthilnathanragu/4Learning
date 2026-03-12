@@ -345,6 +345,548 @@ plt.show()
 
 ---
 
+**Model Evaluation Techniques** are used to **measure how well a machine learning model performs**.
+After training a model, we need to check whether it **predicts correctly on new (unseen) data**.
+
+If we do not evaluate the model properly, it may **memorize the training data but fail in real-world predictions**. This problem is called **overfitting**.
+
+So, evaluation techniques help us answer:
+
+* Is the model accurate?
+* Does it generalize well to new data?
+* Which model is better?
+
+---
+
+# 1. Train-Test Split
+
+This is the **simplest evaluation technique**.
+
+The dataset is divided into **two parts**:
+
+1. **Training Set** – Used to train the model
+2. **Testing Set** – Used to evaluate the model
+
+Example:
+
+If we have **150 samples (Iris dataset)**
+
+* Training data → 120 samples (80%)
+* Testing data → 30 samples (20%)
+
+Process:
+
+1. Train model using training data
+2. Test the model using test data
+3. Compare predicted values with actual values
+
+Python example:
+
+```python
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+```
+
+Here:
+
+* `X_train` → training features
+* `X_test` → testing features
+* `y_train` → training labels
+* `y_test` → testing labels
+
+---
+
+# 2. Accuracy
+
+Accuracy is the **most common evaluation metric**.
+
+It measures the **percentage of correct predictions**.
+
+Formula:
+
+Accuracy =
+(Number of Correct Predictions / Total Predictions) × 100
+
+Example:
+
+Suppose the model tested **30 samples**.
+
+* Correct predictions = 27
+* Wrong predictions = 3
+
+Accuracy =
+
+27 / 30 = **0.9 (90%)**
+
+Python example:
+
+```python
+from sklearn.metrics import accuracy_score
+
+accuracy = accuracy_score(y_test, y_pred)
+print(accuracy)
+```
+
+Limitations:
+
+Accuracy works well when **classes are balanced**.
+But if data is **imbalanced**, accuracy can be misleading.
+
+---
+
+# 3. Confusion Matrix
+
+A **Confusion Matrix** shows how many predictions were correct and incorrect.
+
+For binary classification it looks like this:
+
+|                 | Predicted Positive  | Predicted Negative  |
+| --------------- | ------------------- | ------------------- |
+| Actual Positive | True Positive (TP)  | False Negative (FN) |
+| Actual Negative | False Positive (FP) | True Negative (TN)  |
+
+Meaning:
+
+**True Positive (TP)**
+Model correctly predicts positive.
+
+**True Negative (TN)**
+Model correctly predicts negative.
+
+**False Positive (FP)**
+Model predicts positive but actually negative.
+
+**False Negative (FN)**
+Model predicts negative but actually positive.
+
+Example:
+
+```python
+from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(y_test, y_pred)
+print(cm)
+```
+
+Example output:
+
+```
+[[10 0 0]
+ [0 8 2]
+ [0 1 9]]
+```
+
+This shows how many predictions were correct or incorrect for each class.
+
+---
+
+# 4. Precision
+
+Precision measures **how many predicted positives are actually correct**.
+
+Formula:
+
+Precision =
+TP / (TP + FP)
+
+Example:
+
+Model predicted **10 emails as spam**
+
+* 8 are actually spam
+* 2 are not spam
+
+Precision =
+
+8 / (8 + 2) = **0.8**
+
+Meaning:
+
+80% of predicted spam emails were actually spam.
+
+Python example:
+
+```python
+from sklearn.metrics import precision_score
+precision = precision_score(y_test, y_pred, average='macro')
+```
+
+---
+
+# 5. Recall (Sensitivity)
+
+Recall measures **how many actual positives were correctly predicted**.
+
+Formula:
+
+Recall =
+TP / (TP + FN)
+
+Example:
+
+Suppose there are **10 spam emails**
+
+Model detects **8**
+
+Recall =
+
+8 / 10 = **0.8**
+
+Meaning:
+
+Model detected **80% of spam emails**.
+
+Python example:
+
+```python
+from sklearn.metrics import recall_score
+recall = recall_score(y_test, y_pred, average='macro')
+```
+
+---
+
+# 6. F1 Score
+
+F1 Score is the **balance between Precision and Recall**.
+
+Formula:
+
+F1 Score =
+
+2 × (Precision × Recall) / (Precision + Recall)
+
+It is useful when:
+
+* Data is **imbalanced**
+* Both **precision and recall are important**
+
+Python example:
+
+```python
+from sklearn.metrics import f1_score
+f1 = f1_score(y_test, y_pred, average='macro')
+```
+
+---
+
+# 7. Cross Validation
+
+Cross Validation is a **better evaluation technique than train-test split**.
+
+Instead of splitting data once, it splits data **multiple times**.
+
+Most common method:
+
+**K-Fold Cross Validation**
+
+Example: **5-fold cross validation**
+
+Steps:
+
+1. Dataset divided into **5 parts**
+2. Train on **4 parts**
+3. Test on **1 part**
+4. Repeat **5 times**
+5. Average the results
+
+Benefits:
+
+* More reliable evaluation
+* Uses the entire dataset
+
+Python example:
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+
+model = KNeighborsClassifier()
+
+scores = cross_val_score(model, X, y, cv=5)
+
+print(scores)
+print(scores.mean())
+```
+
+---
+
+# Summary of Model Evaluation Techniques
+
+Train-Test Split
+→ Splits dataset into training and testing
+
+Accuracy
+→ Percentage of correct predictions
+
+Confusion Matrix
+→ Detailed prediction results
+
+Precision
+→ Correct positive predictions
+
+Recall
+→ Correct detection of actual positives
+
+F1 Score
+→ Balance between precision and recall
+
+
+For **Regression models**, we cannot use accuracy like classification.
+Instead, we measure **how far the predicted value is from the actual value**.
+
+The most common **Model Evaluation Techniques for Regression** are:
+
+* **MAE (Mean Absolute Error)**
+* **MSE (Mean Squared Error)**
+* **R² Score (Coefficient of Determination)**
+
+---
+
+# 1. MAE – Mean Absolute Error
+
+MAE = \frac{1}{n}\sum_{i=1}^{n} |y_i - \hat{y}_i|
+
+### Meaning
+
+MAE calculates the **average absolute difference between actual values and predicted values**.
+
+* (y_i) → actual value
+* (\hat{y}_i) → predicted value
+* (n) → number of samples
+
+### Key idea
+
+It measures **how wrong the predictions are on average**.
+
+Absolute value means **negative errors become positive**.
+
+---
+
+### Example
+
+Actual house prices:
+
+```
+[200, 250, 300]
+```
+
+Predicted prices:
+
+```
+[210, 240, 290]
+```
+
+Errors:
+
+```
+|200 - 210| = 10
+|250 - 240| = 10
+|300 - 290| = 10
+```
+
+MAE:
+
+```
+(10 + 10 + 10) / 3 = 10
+```
+
+Meaning:
+
+**On average, the model prediction is off by 10 units.**
+
+---
+
+### Advantages
+
+* Easy to understand
+* Not sensitive to outliers
+
+---
+
+### Python Example
+
+```python
+from sklearn.metrics import mean_absolute_error
+
+mae = mean_absolute_error(y_test, y_pred)
+print("MAE:", mae)
+```
+
+---
+
+# 2. MSE – Mean Squared Error
+
+MSE = \frac{1}{n}\sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+
+### Meaning
+
+MSE calculates the **average of squared errors**.
+
+Instead of absolute values, the errors are **squared**.
+
+---
+
+### Example
+
+Actual values:
+
+```
+[200, 250, 300]
+```
+
+Predicted values:
+
+```
+[210, 240, 290]
+```
+
+Errors:
+
+```
+200 - 210 = -10
+250 - 240 = 10
+300 - 290 = 10
+```
+
+Squared errors:
+
+```
+(-10)^2 = 100
+10^2 = 100
+10^2 = 100
+```
+
+MSE:
+
+```
+(100 + 100 + 100) / 3 = 100
+```
+
+---
+
+### Key idea
+
+Because errors are **squared**, large errors get **penalized more heavily**.
+
+Example:
+
+```
+Error = 2  → 4
+Error = 10 → 100
+```
+
+So MSE strongly penalizes **large mistakes**.
+
+---
+
+### Advantages
+
+* Good for optimization
+* Used in most regression algorithms
+
+---
+
+### Python Example
+
+```python
+from sklearn.metrics import mean_squared_error
+
+mse = mean_squared_error(y_test, y_pred)
+print("MSE:", mse)
+```
+
+---
+
+# 3. R² Score (Coefficient of Determination)
+
+R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}
+
+### Meaning
+
+R² measures **how well the model explains the variance in the data**.
+
+It tells **how good the model is compared to a simple average prediction**.
+
+---
+
+### Value Range
+
+```
+R² = 1      → Perfect model
+R² = 0      → Model is same as predicting mean
+R² < 0      → Model is worse than mean prediction
+```
+
+---
+
+### Example
+
+Suppose:
+
+```
+R² = 0.85
+```
+
+This means:
+
+**The model explains 85% of the variation in the data.**
+
+---
+
+### Interpretation
+
+| R² Score | Meaning            |
+| -------- | ------------------ |
+| 1        | Perfect prediction |
+| 0.9      | Very good model    |
+| 0.7      | Good model         |
+| 0.5      | Moderate model     |
+| 0        | Poor model         |
+
+---
+
+### Python Example
+
+```python
+from sklearn.metrics import r2_score
+
+r2 = r2_score(y_test, y_pred)
+print("R2 Score:", r2)
+```
+
+---
+
+# Simple Comparison
+
+| Metric   | Meaning                | Sensitive to Outliers |
+| -------- | ---------------------- | --------------------- |
+| MAE      | Average absolute error | No                    |
+| MSE      | Average squared error  | Yes                   |
+| R² Score | Model goodness         | No                    |
+
+---
+
+# Quick Summary
+
+**MAE**
+
+Average absolute difference between predicted and actual values.
+
+**MSE**
+
+Average squared difference between predicted and actual values.
+
+**R² Score**
+
+Shows **how well the model explains the data**.
+
 ## 📊 PART 5: Model Evaluation Techniques
 
 ```python
